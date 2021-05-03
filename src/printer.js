@@ -384,7 +384,7 @@ function renderPages(pages, fontProvider, pdfKitDoc, progressCallback) {
 					renderVector(item.item, pdfKitDoc);
 					break;
 				case 'line':
-					renderLine(item.item, item.item.x, item.item.y, pdfKitDoc);
+					renderLine(item.item, item.item.x, item.item.y, pdfKitDoc, progressCallback, i+1); // XXX i+1 is page number
 					break;
 				case 'image':
 					renderImage(item.item, item.item.x, item.item.y, pdfKitDoc);
@@ -400,7 +400,7 @@ function renderPages(pages, fontProvider, pdfKitDoc, progressCallback) {
 					break;
 			}
 			renderedItems++;
-			progressCallback(renderedItems / totalItems);
+			// progressCallback(renderedItems / totalItems);
 		}
 		if (page.watermark) {
 			renderWatermark(page, pdfKitDoc);
@@ -427,7 +427,7 @@ function offsetText(y, inline) {
 	return newY;
 }
 
-function renderLine(line, x, y, pdfKitDoc) {
+function renderLine(line, x, y, pdfKitDoc, progressCallback, pageNb) {
 	function preparePageNodeRefLine(_pageNodeRef, inline) {
 		var newWidth;
 		var diffWidth;
@@ -504,7 +504,8 @@ function renderLine(line, x, y, pdfKitDoc) {
 		pdfKitDoc.fontSize(inline.fontSize);
 
 		var shiftedY = offsetText(y + shiftToBaseline, inline);
-		pdfKitDoc.text(inline.text, x + inline.x, shiftedY, options);
+    progressCallback(inline, x + inline.x, shiftedY, options, pageNb);
+    pdfKitDoc.text(inline.text, x + inline.x, shiftedY, options);
 
 		if (inline.linkToPage) {
 			var _ref = pdfKitDoc.ref({ Type: 'Action', S: 'GoTo', D: [inline.linkToPage, 0, 0] }).end();
